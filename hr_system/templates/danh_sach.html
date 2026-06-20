@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Danh sách nhân viên{% endblock %}
+
+{% block content %}
+<h1>Danh sách nhân viên</h1>
+
+<!-- Bộ lọc tìm kiếm -->
+<form class="loc" method="get" action="{{ url_for('danh_sach') }}">
+    <input type="text" name="tu_khoa" placeholder="Tìm theo mã, tên, email..."
+           value="{{ tu_khoa }}">
+    <select name="phong_ban">
+        <option value="">-- Tất cả phòng ban --</option>
+        {% for pb in cac_phong_ban %}
+        <option value="{{ pb }}" {% if pb == phong_ban %}selected{% endif %}>{{ pb }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Tìm kiếm</button>
+    <a href="{{ url_for('danh_sach') }}" class="btn-phu">Xóa lọc</a>
+</form>
+
+{% if danh_sach %}
+<table>
+    <thead>
+        <tr>
+            <th>Mã NV</th><th>Họ tên</th><th>Phòng ban</th><th>Chức vụ</th>
+            <th>Lương net</th><th>KPI</th><th>Trạng thái</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for nv in danh_sach %}
+        {% set luong = tinh_luong(nv) %}
+        {% set loai = xep_loai_kpi(nv.diem_kpi) %}
+        <tr>
+            <td>{{ nv.ma_nv }}</td>
+            <td><a href="{{ url_for('chi_tiet', nv_id=nv.id) }}">{{ nv.ho_ten }}</a></td>
+            <td>{{ nv.phong_ban }}</td>
+            <td>{{ nv.chuc_vu }}</td>
+            <td>{{ dinh_dang_tien(luong.luong_net) }}</td>
+            <td><span class="badge {{ mau_kpi(loai) }}">{{ nv.diem_kpi }} · {{ loai }}</span></td>
+            <td>
+                <span class="trangthai {% if nv.trang_thai == 'Đang làm' %}tt-active{% else %}tt-off{% endif %}">
+                    {{ nv.trang_thai }}
+                </span>
+            </td>
+            <td class="hanh-dong">
+                <a href="{{ url_for('sua', nv_id=nv.id) }}">Sửa</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="ghi-chu">Tổng cộng: {{ danh_sach | length }} nhân viên.</p>
+{% else %}
+<p class="trong">Không tìm thấy nhân viên nào.</p>
+{% endif %}
+{% endblock %}

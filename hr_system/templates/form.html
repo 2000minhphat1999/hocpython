@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ tieu_de }}{% endblock %}
+
+{% block content %}
+<h1>{{ tieu_de }}</h1>
+
+<form class="form" method="post">
+    <div class="form-grid">
+        <label>Mã nhân viên *
+            <input type="text" name="ma_nv" value="{{ nv.ma_nv }}" required>
+        </label>
+        <label>Họ tên *
+            <input type="text" name="ho_ten" value="{{ nv.ho_ten }}" required>
+        </label>
+        <label>Giới tính
+            <select name="gioi_tinh">
+                {% for g in ["Nam", "Nữ", "Khác"] %}
+                <option value="{{ g }}" {% if g == nv.gioi_tinh %}selected{% endif %}>{{ g }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Email
+            <input type="email" name="email" value="{{ nv.email }}">
+        </label>
+        <label>Phòng ban *
+            <input type="text" name="phong_ban" value="{{ nv.phong_ban }}" required>
+        </label>
+        <label>Chức vụ
+            <input type="text" name="chuc_vu" value="{{ nv.chuc_vu }}">
+        </label>
+        <label>Ngày vào làm
+            <input type="date" name="ngay_vao_lam" value="{{ nv.ngay_vao_lam }}">
+        </label>
+        <label>Trạng thái
+            <select name="trang_thai">
+                {% for t in trang_thais %}
+                <option value="{{ t }}" {% if t == nv.trang_thai %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Lương cơ bản (đ)
+            <input type="number" name="luong_co_ban" step="100000" min="0" value="{{ nv.luong_co_ban }}">
+        </label>
+        <label>Phụ cấp (đ)
+            <input type="number" name="phu_cap" step="100000" min="0" value="{{ nv.phu_cap }}">
+        </label>
+        <label>Ngày công
+            <input type="number" name="ngay_cong" min="0" max="31" value="{{ nv.ngay_cong }}">
+        </label>
+        <label>Số người phụ thuộc
+            <input type="number" name="so_nguoi_phu_thuoc" min="0" value="{{ nv.so_nguoi_phu_thuoc }}">
+        </label>
+        <label>Điểm KPI (0 - 10)
+            <input type="number" name="diem_kpi" step="0.1" min="0" max="10" value="{{ nv.diem_kpi }}">
+        </label>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn-them">Lưu</button>
+        <a href="{{ url_for('danh_sach') }}" class="btn-phu">Hủy</a>
+    </div>
+</form>
+{% endblock %}

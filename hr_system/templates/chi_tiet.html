@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ nv.ho_ten }}{% endblock %}
+
+{% block content %}
+{% set loai = xep_loai_kpi(nv.diem_kpi) %}
+
+<div class="header-ct">
+    <h1>{{ nv.ho_ten }}
+        <span class="badge {{ mau_kpi(loai) }}">KPI {{ nv.diem_kpi }} · {{ loai }}</span>
+    </h1>
+    <div class="header-actions">
+        <a href="{{ url_for('sua', nv_id=nv.id) }}" class="btn-them">Sửa</a>
+        <form method="post" action="{{ url_for('xoa', nv_id=nv.id) }}"
+              onsubmit="return confirm('Bạn chắc chắn muốn xóa nhân viên này?');"
+              style="display:inline">
+            <button type="submit" class="btn-xoa">Xóa</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Thông tin hồ sơ -->
+    <section class="panel">
+        <h2>Thông tin hồ sơ</h2>
+        <table class="info">
+            <tr><th>Mã nhân viên</th><td>{{ nv.ma_nv }}</td></tr>
+            <tr><th>Giới tính</th><td>{{ nv.gioi_tinh }}</td></tr>
+            <tr><th>Email</th><td>{{ nv.email }}</td></tr>
+            <tr><th>Phòng ban</th><td>{{ nv.phong_ban }}</td></tr>
+            <tr><th>Chức vụ</th><td>{{ nv.chuc_vu }}</td></tr>
+            <tr><th>Ngày vào làm</th><td>{{ nv.ngay_vao_lam }}</td></tr>
+            <tr><th>Số người phụ thuộc</th><td>{{ nv.so_nguoi_phu_thuoc }}</td></tr>
+            <tr><th>Trạng thái</th><td>{{ nv.trang_thai }}</td></tr>
+        </table>
+    </section>
+
+    <!-- Bảng lương -->
+    <section class="panel">
+        <h2>Bảng lương tháng</h2>
+        <table class="info">
+            <tr><th>Lương cơ bản</th><td>{{ dinh_dang_tien(nv.luong_co_ban) }}</td></tr>
+            <tr><th>Ngày công</th><td>{{ nv.ngay_cong }}</td></tr>
+            <tr><th>Lương theo ngày công</th><td>{{ dinh_dang_tien(luong.luong_thuc_te) }}</td></tr>
+            <tr><th>Phụ cấp</th><td>{{ dinh_dang_tien(luong.phu_cap) }}</td></tr>
+            <tr class="dam"><th>Thu nhập gross</th><td>{{ dinh_dang_tien(luong.thu_nhap_gross) }}</td></tr>
+            <tr><th>Bảo hiểm (10.5%)</th><td>- {{ dinh_dang_tien(luong.bao_hiem) }}</td></tr>
+            <tr><th>Giảm trừ gia cảnh</th><td>{{ dinh_dang_tien(luong.giam_tru) }}</td></tr>
+            <tr><th>Thu nhập tính thuế</th><td>{{ dinh_dang_tien(luong.thu_nhap_tinh_thue) }}</td></tr>
+            <tr><th>Thuế TNCN</th><td>- {{ dinh_dang_tien(luong.thue) }}</td></tr>
+            <tr class="dam tong"><th>Lương thực nhận (net)</th><td>{{ dinh_dang_tien(luong.luong_net) }}</td></tr>
+        </table>
+    </section>
+</div>
+
+<p><a href="{{ url_for('danh_sach') }}" class="btn-phu">← Về danh sách</a></p>
+{% endblock %}

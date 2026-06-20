@@ -1,0 +1,7 @@
+# File database SQLite (dữ liệu sinh ra khi chạy, không commit)
+hr.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
