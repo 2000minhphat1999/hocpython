@@ -43,7 +43,10 @@
             <tr><th>Lương theo ngày công</th><td>{{ dinh_dang_tien(luong.luong_thuc_te) }}</td></tr>
             <tr><th>Phụ cấp</th><td>{{ dinh_dang_tien(luong.phu_cap) }}</td></tr>
             <tr class="dam"><th>Thu nhập gross</th><td>{{ dinh_dang_tien(luong.thu_nhap_gross) }}</td></tr>
-            <tr><th>Bảo hiểm (10.5%)</th><td>- {{ dinh_dang_tien(luong.bao_hiem) }}</td></tr>
+            <tr><th>BHXH (8%)</th><td>- {{ dinh_dang_tien(luong.bhxh) }}</td></tr>
+            <tr><th>BHYT (1.5%)</th><td>- {{ dinh_dang_tien(luong.bhyt) }}</td></tr>
+            <tr><th>BHTN (1%)</th><td>- {{ dinh_dang_tien(luong.bhtn) }}</td></tr>
+            <tr><th>Tổng bảo hiểm (10.5%)</th><td>- {{ dinh_dang_tien(luong.bao_hiem) }}</td></tr>
             <tr><th>Giảm trừ gia cảnh</th><td>{{ dinh_dang_tien(luong.giam_tru) }}</td></tr>
             <tr><th>Thu nhập tính thuế</th><td>{{ dinh_dang_tien(luong.thu_nhap_tinh_thue) }}</td></tr>
             <tr><th>Thuế TNCN</th><td>- {{ dinh_dang_tien(luong.thue) }}</td></tr>

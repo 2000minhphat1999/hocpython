@@ -12,13 +12,30 @@ Mọi con số dựa trên quy định phổ biến tại Việt Nam để mang 
 # Số ngày công chuẩn trong tháng (dùng để tính lương theo ngày công thực tế).
 NGAY_CONG_CHUAN = 26
 
-# Tỷ lệ bảo hiểm bắt buộc người lao động đóng (trên lương cơ bản):
-#   BHXH 8% + BHYT 1.5% + BHTN 1% = 10.5%
-TY_LE_BAO_HIEM = 0.105
+# --- Tỷ lệ bảo hiểm bắt buộc phần người lao động đóng ---
+#   BHXH 8% + BHYT 1.5% + BHTN 1% = 10.5% (tính trên lương đóng BH).
+TY_LE_BHXH = 0.08
+TY_LE_BHYT = 0.015
+TY_LE_BHTN = 0.01
 
-# Giảm trừ gia cảnh (theo quy định thuế TNCN Việt Nam).
-GIAM_TRU_BAN_THAN = 11_000_000          # cho bản thân người nộp thuế
-GIAM_TRU_NGUOI_PHU_THUOC = 4_400_000    # cho mỗi người phụ thuộc
+# --- Trần (mức tối đa) tiền lương đóng bảo hiểm, áp dụng từ 01/01/2026 ---
+# BHXH & BHYT: tối đa 20 lần lương cơ sở (mức tham chiếu) = 20 x 2.340.000.
+LUONG_CO_SO = 2_340_000
+TRAN_BHXH_BHYT = 20 * LUONG_CO_SO        # = 46.800.000đ
+
+# BHTN: tối đa 20 lần lương tối thiểu vùng (Nghị định 293/2025/NĐ-CP).
+LUONG_TOI_THIEU_VUNG = {
+    1: 5_310_000,
+    2: 4_730_000,
+    3: 4_140_000,
+    4: 3_700_000,
+}
+# Vùng của doanh nghiệp (đổi theo địa bàn đặt trụ sở). Mặc định Vùng I.
+VUNG_DOANH_NGHIEP = 1
+
+# --- Giảm trừ gia cảnh (Nghị quyết 110/2025/UBTVQH15, từ kỳ thuế 2026) ---
+GIAM_TRU_BAN_THAN = 15_500_000          # cho bản thân người nộp thuế
+GIAM_TRU_NGUOI_PHU_THUOC = 6_200_000    # cho mỗi người phụ thuộc
 
 # Biểu thuế thu nhập cá nhân lũy tiến từng phần (theo tháng).
 # Mỗi phần tử: (giới hạn trên của bậc, thuế suất). None = không giới hạn.
@@ -33,9 +50,28 @@ BAC_THUE = [
 ]
 
 
-def tinh_bao_hiem(luong_co_ban: float) -> float:
-    """Tính tiền bảo hiểm người lao động phải đóng."""
-    return luong_co_ban * TY_LE_BAO_HIEM
+def tinh_bao_hiem(luong_dong_bh: float, vung: int = VUNG_DOANH_NGHIEP) -> dict:
+    """Tính bảo hiểm bắt buộc phần người lao động đóng (có áp trần).
+
+    - BHXH (8%) và BHYT (1.5%) tính trên min(lương, trần 20 x lương cơ sở).
+    - BHTN (1%) tính trên min(lương, trần 20 x lương tối thiểu vùng).
+
+    Trả về dict gồm: bhxh, bhyt, bhtn, tong.
+    """
+    can_cu_xh_yt = min(luong_dong_bh, TRAN_BHXH_BHYT)
+    tran_bhtn = 20 * LUONG_TOI_THIEU_VUNG.get(vung, LUONG_TOI_THIEU_VUNG[1])
+    can_cu_tn = min(luong_dong_bh, tran_bhtn)
+
+    bhxh = can_cu_xh_yt * TY_LE_BHXH
+    bhyt = can_cu_xh_yt * TY_LE_BHYT
+    bhtn = can_cu_tn * TY_LE_BHTN
+
+    return {
+        "bhxh": bhxh,
+        "bhyt": bhyt,
+        "bhtn": bhtn,
+        "tong": bhxh + bhyt + bhtn,
+    }
 
 
 def tinh_thue_tncn(thu_nhap_tinh_thue: float) -> float:
@@ -86,8 +122,9 @@ def tinh_luong(nv) -> dict:
     # Tổng thu nhập trước thuế (gross).
     thu_nhap_gross = luong_thuc_te + phu_cap
 
-    # Bảo hiểm tính trên lương cơ bản.
-    bao_hiem = tinh_bao_hiem(luong_co_ban)
+    # Bảo hiểm tính trên lương cơ bản (đã áp trần theo quy định).
+    bh = tinh_bao_hiem(luong_co_ban)
+    bao_hiem = bh["tong"]
 
     # Giảm trừ gia cảnh.
     giam_tru = GIAM_TRU_BAN_THAN + so_phu_thuoc * GIAM_TRU_NGUOI_PHU_THUOC
@@ -103,6 +140,9 @@ def tinh_luong(nv) -> dict:
         "luong_thuc_te": luong_thuc_te,
         "phu_cap": phu_cap,
         "thu_nhap_gross": thu_nhap_gross,
+        "bhxh": bh["bhxh"],
+        "bhyt": bh["bhyt"],
+        "bhtn": bh["bhtn"],
         "bao_hiem": bao_hiem,
         "giam_tru": giam_tru,
         "thu_nhap_tinh_thue": max(thu_nhap_tinh_thue, 0),

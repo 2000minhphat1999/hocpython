@@ -49,15 +49,27 @@ python app.py
 
 Mở trình duyệt tại **http://127.0.0.1:5000**
 
-## Quy tắc tính lương (minh họa theo quy định Việt Nam)
+## Quy tắc tính lương (theo quy định Việt Nam, hiệu lực 2026)
 
 | Khoản | Công thức |
 |-------|-----------|
 | Lương theo ngày công | `lương cơ bản × ngày công / 26` |
 | Thu nhập gross | `lương theo ngày công + phụ cấp` |
-| Bảo hiểm | `lương cơ bản × 10.5%` (BHXH 8% + BHYT 1.5% + BHTN 1%) |
-| Giảm trừ gia cảnh | `11.000.000 + 4.400.000 × số người phụ thuộc` |
+| BHXH | `8% × min(lương, 46.800.000)` |
+| BHYT | `1.5% × min(lương, 46.800.000)` |
+| BHTN | `1% × min(lương, 20 × lương tối thiểu vùng)` |
+| Giảm trừ gia cảnh | `15.500.000 + 6.200.000 × số người phụ thuộc` |
 | Thuế TNCN | Lũy tiến từng phần (5% → 35%) |
 | Lương net | `gross − bảo hiểm − thuế` |
 
-> Các con số mang tính minh họa cho mục đích học tập.
+### Căn cứ pháp lý áp dụng
+
+- **Giảm trừ gia cảnh** 15,5tr (bản thân) / 6,2tr (mỗi người phụ thuộc):
+  Nghị quyết 110/2025/UBTVQH15, hiệu lực từ kỳ tính thuế 2026.
+- **Trần đóng BHXH/BHYT** = 20 × lương cơ sở (2.340.000đ) = 46.800.000đ.
+- **Trần đóng BHTN** = 20 × lương tối thiểu vùng (Nghị định 293/2025/NĐ-CP):
+  Vùng I 5.310.000đ · II 4.730.000đ · III 4.140.000đ · IV 3.700.000đ.
+  Vùng doanh nghiệp đặt trong `hr_logic.VUNG_DOANH_NGHIEP` (mặc định Vùng I).
+
+> Lưu ý: lấy lương cơ bản làm lương đóng bảo hiểm (giả định đơn giản hóa);
+> phụ cấp được coi là thu nhập chịu thuế.
