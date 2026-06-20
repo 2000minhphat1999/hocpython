@@ -9,6 +9,8 @@ Chứa các quy tắc "thông minh":
 Mọi con số dựa trên quy định phổ biến tại Việt Nam để mang tính minh họa.
 """
 
+from datetime import date
+
 # Số ngày công chuẩn trong tháng (dùng để tính lương theo ngày công thực tế).
 NGAY_CONG_CHUAN = 26
 
@@ -231,3 +233,124 @@ def thong_ke(danh_sach) -> dict:
 def dinh_dang_tien(so: float) -> str:
     """Định dạng số tiền kiểu Việt Nam: 12,500,000đ."""
     return f"{so:,.0f}đ"
+
+
+# ---------------------------------------------------------------------------
+# Giữ chân nhân tài (Talent retention) - phát hiện nhân sự giỏi có nguy cơ
+# nghỉ việc và gợi ý hành động. Logic theo quy tắc, dễ giải thích.
+# ---------------------------------------------------------------------------
+
+# Ngưỡng điểm KPI để coi là "nhân sự giỏi" (Tốt trở lên).
+NGUONG_NHAN_TAI = 7.0
+
+
+def so_nam_lam_viec(ngay_vao_lam: str) -> float:
+    """Tính số năm làm việc tính đến hôm nay từ ngày vào làm (YYYY-MM-DD)."""
+    if not ngay_vao_lam:
+        return 0.0
+    try:
+        nam, thang, ngay = map(int, str(ngay_vao_lam)[:10].split("-"))
+        bat_dau = date(nam, thang, ngay)
+        return max((date.today() - bat_dau).days / 365.25, 0.0)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def _luong_net_tb_phong_ban(danh_sach) -> dict:
+    """Tính lương net trung bình từng phòng ban (chỉ nhân viên đang làm)."""
+    tong, dem = {}, {}
+    for nv in danh_sach:
+        if nv["trang_thai"] != "Đang làm":
+            continue
+        pb = nv["phong_ban"]
+        net = tinh_luong(nv)["luong_net"]
+        tong[pb] = tong.get(pb, 0.0) + net
+        dem[pb] = dem.get(pb, 0) + 1
+    return {pb: tong[pb] / dem[pb] for pb in tong}
+
+
+def muc_rui_ro(diem: float) -> str:
+    """Phân mức rủi ro nghỉ việc theo điểm (0-100)."""
+    if diem >= 60:
+        return "Cao"
+    elif diem >= 30:
+        return "Trung bình"
+    else:
+        return "Thấp"
+
+
+def mau_rui_ro(muc: str) -> str:
+    """Lớp CSS tô màu badge mức rủi ro (tái dùng màu của KPI)."""
+    return {
+        "Cao": "kpi-canclt",
+        "Trung bình": "kpi-dat",
+        "Thấp": "kpi-tot",
+    }.get(muc, "")
+
+
+def danh_gia_rui_ro_nghi_viec(nv, mat_bang_pb: float) -> dict:
+    """Đánh giá rủi ro nghỉ việc của một nhân viên (điểm 0-100) + gợi ý.
+
+    Công thức:
+        kpi_factor   = (KPI - 5) / 5                 -> càng giỏi, càng đáng giữ
+        pay_signal   = chênh lệch lương / (25% mặt bằng)  -> thấp hơn 25% là báo động
+        tham_nien    = số năm / 4 (tối đa 1)          -> gắn bó lâu, cần ghi nhận
+        rủi ro = 100 × kpi_factor × (0.7 × pay_signal + 0.3 × thâm niên)
+
+    Nghĩa là: chỉ nhân viên GIỎI mà bị trả thấp / gắn bó lâu mới rủi ro cao.
+    """
+    net = tinh_luong(nv)["luong_net"]
+    benchmark = mat_bang_pb if mat_bang_pb > 0 else net
+    kpi = nv["diem_kpi"]
+    so_nam = so_nam_lam_viec(nv["ngay_vao_lam"])
+
+    kpi_factor = max(0.0, min((kpi - 5) / 5, 1.0))
+    chenh_lech = benchmark - net
+    # Trả thấp hơn 25% mặt bằng phòng ban được coi là tín hiệu rủi ro tối đa.
+    nguong = 0.25 * benchmark
+    pay_signal = min(max(chenh_lech, 0.0) / nguong, 1.0) if nguong > 0 else 0.0
+    tham_nien_factor = min(so_nam / 4, 1.0)
+
+    diem = round(100 * kpi_factor * (0.7 * pay_signal + 0.3 * tham_nien_factor))
+
+    # Gợi ý hành động cụ thể.
+    goi_y = []
+    if chenh_lech > 0:
+        goi_y.append(
+            f"Xem xét tăng ~{dinh_dang_tien(chenh_lech)} để đạt mặt bằng phòng ban"
+        )
+    if so_nam >= 3:
+        goi_y.append("Đánh giá lộ trình thăng tiến / ghi nhận thâm niên")
+    if kpi >= 8.5:
+        goi_y.append("Khen thưởng, giữ chân nhân tài xuất sắc")
+    if not goi_y:
+        goi_y.append("Duy trì chính sách hiện tại")
+
+    return {
+        "diem_rui_ro": diem,
+        "muc_rui_ro": muc_rui_ro(diem),
+        "luong_net": net,
+        "mat_bang_pb": benchmark,
+        "chenh_lech": chenh_lech,
+        "so_nam": so_nam,
+        "goi_y": goi_y,
+    }
+
+
+def phan_tich_giu_chan(danh_sach) -> list:
+    """Phân tích giữ chân nhân tài: nhân viên đang làm có KPI >= 7.
+
+    Trả về danh sách dict (gồm thông tin nhân viên + đánh giá rủi ro),
+    sắp xếp theo điểm rủi ro giảm dần (nguy cơ cao lên đầu).
+    """
+    mat_bang = _luong_net_tb_phong_ban(danh_sach)
+    ket_qua = []
+    for nv in danh_sach:
+        if nv["trang_thai"] != "Đang làm" or nv["diem_kpi"] < NGUONG_NHAN_TAI:
+            continue
+        danh_gia = danh_gia_rui_ro_nghi_viec(nv, mat_bang.get(nv["phong_ban"], 0))
+        danh_gia["nv"] = nv
+        ket_qua.append(danh_gia)
+
+    ket_qua.sort(key=lambda x: x["diem_rui_ro"], reverse=True)
+    return ket_qua
