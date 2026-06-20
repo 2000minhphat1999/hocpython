@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Giữ chân nhân tài{% endblock %}
+
+{% block content %}
+<h1>Giữ chân nhân tài</h1>
+<p class="mo-ta">
+    Phân tích nhân sự giỏi (KPI ≥ 7) đang làm việc và ước tính nguy cơ nghỉ
+    việc. Nguy cơ cao khi nhân viên <strong>giỏi</strong> nhưng
+    <strong>lương dưới mặt bằng phòng ban</strong> và/hoặc
+    <strong>gắn bó lâu</strong> mà chưa được ghi nhận.
+</p>
+
+{% if danh_sach %}
+<table>
+    <thead>
+        <tr>
+            <th>Họ tên</th><th>Phòng ban</th><th>KPI</th>
+            <th>Lương net</th><th>Mặt bằng PB</th><th>Chênh lệch</th>
+            <th>Thâm niên</th><th>Nguy cơ</th><th>Gợi ý hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for x in danh_sach %}
+        {% set nv = x.nv %}
+        <tr>
+            <td><a href="{{ url_for('chi_tiet', nv_id=nv.id) }}">{{ nv.ho_ten }}</a></td>
+            <td>{{ nv.phong_ban }}</td>
+            <td><span class="badge {{ mau_kpi(xep_loai_kpi(nv.diem_kpi)) }}">{{ nv.diem_kpi }}</span></td>
+            <td>{{ dinh_dang_tien(x.luong_net) }}</td>
+            <td>{{ dinh_dang_tien(x.mat_bang_pb) }}</td>
+            <td class="{% if x.chenh_lech > 0 %}am{% endif %}">
+                {% if x.chenh_lech > 0 %}-{{ dinh_dang_tien(x.chenh_lech) }}{% else %}—{% endif %}
+            </td>
+            <td>{{ "%.1f"|format(x.so_nam) }} năm</td>
+            <td>
+                <span class="badge {{ mau_rui_ro(x.muc_rui_ro) }}">
+                    {{ x.diem_rui_ro }} · {{ x.muc_rui_ro }}
+                </span>
+            </td>
+            <td class="goi-y">
+                <ul>
+                    {% for g in x.goi_y %}<li>{{ g }}</li>{% endfor %}
+                </ul>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="ghi-chu">
+    Tổng {{ danh_sach | length }} nhân tài. Cách tính: điểm rủi ro (0-100) =
+    mức độ giỏi × (65% khoảng cách lương + 35% thâm niên).
+</p>
+{% else %}
+<p class="trong">Chưa có nhân sự giỏi nào (KPI ≥ 7) để phân tích.</p>
+{% endif %}
+{% endblock %}

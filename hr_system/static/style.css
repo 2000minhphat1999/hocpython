@@ -120,6 +120,19 @@ table.info tr.tong td { color: #16a34a; font-size: 16px; }
 .header-ct { display: flex; justify-content: space-between; align-items: flex-start; }
 .header-actions { display: flex; gap: 10px; }
 
+/* Banner cảnh báo giữ chân nhân tài */
+.canh-bao {
+    background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412;
+    padding: 14px 16px; border-radius: 10px; margin-bottom: 20px;
+}
+.canh-bao a { color: #c2410c; font-weight: 600; text-decoration: none; margin-left: 6px; }
+.canh-bao a:hover { text-decoration: underline; }
+
+.mo-ta { color: #475569; margin-bottom: 18px; max-width: 760px; }
+td.am { color: #dc2626; font-weight: 600; }
+.goi-y ul { margin: 0; padding-left: 18px; }
+.goi-y li { font-size: 13px; color: #475569; margin-bottom: 2px; }
+
 .trong { color: #94a3b8; padding: 20px 0; }
 .ghi-chu { color: #64748b; font-size: 14px; margin-top: 12px; }
 .footer { text-align: center; color: #94a3b8; font-size: 13px; padding: 30px 0; }

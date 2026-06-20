@@ -4,6 +4,13 @@
 {% block content %}
 <h1>Bảng điều khiển</h1>
 
+{% if nguy_co_cao > 0 %}
+<div class="canh-bao">
+    ⚠️ Có <strong>{{ nguy_co_cao }}</strong> nhân tài đang ở mức nguy cơ nghỉ việc <strong>cao</strong>.
+    <a href="{{ url_for('giu_chan') }}">Xem & xử lý ngay →</a>
+</div>
+{% endif %}
+
 <!-- Thẻ thống kê tổng quan -->
 <section class="cards">
     <div class="card">

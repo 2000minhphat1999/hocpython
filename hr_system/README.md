@@ -14,6 +14,13 @@ rộng sang web, cơ sở dữ liệu.
   (tương tự bài tập "xếp loại học sinh").
 - **Bảng điều khiển thông minh**: tổng nhân viên, quỹ lương, lương trung
   bình, thống kê theo phòng ban, phân bố KPI, top nhân viên.
+- **Giữ chân nhân tài**: phát hiện nhân sự giỏi (KPI ≥ 7) có nguy cơ nghỉ
+  việc và gợi ý hành động. Điểm rủi ro (0-100) tính theo quy tắc:
+
+  > rủi ro = mức độ giỏi × (70% khoảng cách lương so với mặt bằng phòng ban
+  > + 30% thâm niên). Bị trả thấp hơn ~25% mặt bằng được coi là báo động.
+
+  Dashboard cảnh báo số nhân tài ở mức nguy cơ **Cao**.
 
 ## Cấu trúc dự án
 

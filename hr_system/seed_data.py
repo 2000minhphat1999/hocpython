@@ -33,6 +33,10 @@ MAU = [
      "2016-08-15", 28_000_000, 3_000_000, 26, 2, 8.5, "Đang làm"),
     ("NV010", "Đỗ Thị Lan", "Nữ", "lan.dt@congty.vn", "Kế toán", "Kế toán viên",
      "2024-03-01", 14_000_000, 1_000_000, 26, 0, 6.8, "Đang làm"),
+    # Nhân tài có nguy cơ nghỉ việc cao: KPI rất cao nhưng lương thấp hơn
+    # nhiều so với mặt bằng phòng Kỹ thuật, lại gắn bó đã lâu.
+    ("NV011", "Trịnh Quốc Khánh", "Nam", "khanh.tq@congty.vn", "Kỹ thuật",
+     "Lập trình viên", "2021-02-01", 16_000_000, 1_000_000, 26, 0, 9.3, "Đang làm"),
 ]
 
 KHOA = [

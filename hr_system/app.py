@@ -26,6 +26,7 @@ app.jinja_env.globals.update(
     tinh_luong=hr_logic.tinh_luong,
     xep_loai_kpi=hr_logic.xep_loai_kpi,
     mau_kpi=hr_logic.mau_kpi,
+    mau_rui_ro=hr_logic.mau_rui_ro,
     dinh_dang_tien=hr_logic.dinh_dang_tien,
 )
 
@@ -88,7 +89,18 @@ def dashboard():
     """Trang chủ - bảng điều khiển thống kê."""
     danh_sach = database.danh_sach_nhan_vien()
     tk = hr_logic.thong_ke(danh_sach)
-    return render_template("dashboard.html", tk=tk)
+    # Số nhân tài đang có nguy cơ nghỉ việc cao (để hiển thị cảnh báo).
+    giu_chan = hr_logic.phan_tich_giu_chan(danh_sach)
+    nguy_co_cao = sum(1 for x in giu_chan if x["muc_rui_ro"] == "Cao")
+    return render_template("dashboard.html", tk=tk, nguy_co_cao=nguy_co_cao)
+
+
+@app.route("/giu-chan")
+def giu_chan():
+    """Phân tích giữ chân nhân tài - nhân sự giỏi có nguy cơ nghỉ việc."""
+    danh_sach = database.danh_sach_nhan_vien()
+    ds = hr_logic.phan_tich_giu_chan(danh_sach)
+    return render_template("giu_chan.html", danh_sach=ds)
 
 
 @app.route("/nhan-vien")
