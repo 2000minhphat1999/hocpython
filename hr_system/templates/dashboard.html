@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Bảng điều khiển{% endblock %}
+
+{% block content %}
+<h1>Bảng điều khiển</h1>
+
+<!-- Thẻ thống kê tổng quan -->
+<section class="cards">
+    <div class="card">
+        <div class="card-so">{{ tk.tong_so }}</div>
+        <div class="card-nhan">Tổng nhân viên</div>
+    </div>
+    <div class="card">
+        <div class="card-so">{{ tk.so_phong_ban }}</div>
+        <div class="card-nhan">Phòng ban</div>
+    </div>
+    <div class="card">
+        <div class="card-so">{{ dinh_dang_tien(tk.luong_tb) }}</div>
+        <div class="card-nhan">Lương net trung bình</div>
+    </div>
+    <div class="card">
+        <div class="card-so">{{ dinh_dang_tien(tk.tong_luong_net) }}</div>
+        <div class="card-nhan">Tổng quỹ lương net</div>
+    </div>
+</section>
+
+<div class="grid-2">
+    <!-- Phân bố KPI -->
+    <section class="panel">
+        <h2>Phân bố hiệu suất (KPI)</h2>
+        {% set tong = tk.tong_so if tk.tong_so > 0 else 1 %}
+        {% for loai, so in tk.phan_bo_kpi.items() %}
+        <div class="bar-row">
+            <span class="bar-label">{{ loai }}</span>
+            <div class="bar-track">
+                <div class="bar-fill {{ mau_kpi(loai) }}"
+                     style="width: {{ (so / tong * 100) | round(1) }}%"></div>
+            </div>
+            <span class="bar-so">{{ so }}</span>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Top nhân viên -->
+    <section class="panel">
+        <h2>Top nhân viên theo KPI</h2>
+        {% if tk.top_nhan_vien %}
+        <table class="mini-table">
+            <thead>
+                <tr><th>Họ tên</th><th>Phòng ban</th><th>KPI</th></tr>
+            </thead>
+            <tbody>
+                {% for nv in tk.top_nhan_vien %}
+                <tr>
+                    <td><a href="{{ url_for('chi_tiet', nv_id=nv.id) }}">{{ nv.ho_ten }}</a></td>
+                    <td>{{ nv.phong_ban }}</td>
+                    <td><span class="badge {{ mau_kpi(xep_loai_kpi(nv.diem_kpi)) }}">{{ nv.diem_kpi }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="trong">Chưa có dữ liệu nhân viên.</p>
+        {% endif %}
+    </section>
+</div>
+
+<!-- Thống kê theo phòng ban -->
+<section class="panel">
+    <h2>Thống kê theo phòng ban</h2>
+    {% if tk.theo_phong_ban %}
+    <table>
+        <thead>
+            <tr><th>Phòng ban</th><th>Số nhân viên</th><th>Tổng lương net</th></tr>
+        </thead>
+        <tbody>
+            {% for pb, info in tk.theo_phong_ban.items() %}
+            <tr>
+                <td>{{ pb }}</td>
+                <td>{{ info.so_nguoi }}</td>
+                <td>{{ dinh_dang_tien(info.tong_luong) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="trong">Chưa có dữ liệu. Hãy <a href="{{ url_for('them') }}">thêm nhân viên</a>.</p>
+    {% endif %}
+</section>
+{% endblock %}
